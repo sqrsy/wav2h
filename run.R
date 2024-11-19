@@ -2,8 +2,9 @@ library(tuneR)
 setwd("C:/Users/61436/Dropbox/Hobbies/Electronics/GitHub/wav2h")
 source("wav2h.R")
 
-MOVING_AVERAGE_WINDOW = 100
-SAVE_ONE_IN_EVERY = 50
+MOVING_AVERAGE_WINDOW_1 = 10000
+SAVE_ONE_IN_EVERY = 60
+MOVING_AVERAGE_WINDOW_2 = 30 # smooth out after down-sample
 PROJECT_FOLDER = "toy-animal-sounds/"
 WAV_FOLDER = "_wav out/"
 OUTPUT_DIR = "_h out/"
@@ -43,18 +44,16 @@ lapply(all_wavs, function(wav_file) {
   plot(wav)
   
   # add some zeros so envelope doesn't rise too sharply...
-  wav@left <- c(rep(0, MOVING_AVERAGE_WINDOW), wav@left)
-  to_output <- moving_average(wav, MOVING_AVERAGE_WINDOW)
-  plot(to_output)
+  wav <- moving_average(wav, MOVING_AVERAGE_WINDOW_1)
+  wav <- down_sample(wav, SAVE_ONE_IN_EVERY)
+  wav <- moving_average(wav, MOVING_AVERAGE_WINDOW_2)
+  plot(wav)
   
   cpp_code <-
-    as_cpp(
-      to_output,
-      file_prefix,
-      reduction_factor = SAVE_ONE_IN_EVERY,
-      object_type = CPP_OBJECT_TYPE,
-      max_int_size = MAX_VALUE
-    )
+    as_cpp(wav,
+           file_prefix,
+           object_type = CPP_OBJECT_TYPE,
+           max_int_size = MAX_VALUE)
   
   # save C++ object
   sink(PROJECT_FOLDER %+% OUTPUT_DIR %+% OUTPUT_FILE, append = TRUE)

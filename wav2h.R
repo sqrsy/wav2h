@@ -11,9 +11,18 @@ setGeneric("moving_average",
 # compute a moving average
 setMethod("moving_average", "Wave",
           function(x, n = 5) {
+            x@left <- c(rep(0, n), x@left, rep(0, n))
             x@left = moving_average(x@left, n = n)
             x
           })
+
+# down-sample wave by taking every k-th value
+down_sample <- function(wav, reduction_factor) {
+  reduction_flag = 1:length(wav) %% reduction_factor
+  include = which(reduction_flag == 0)
+  wav@left = wav@left[include]
+  wav
+}
 
 # scale between -1 and 1
 scale.Wave <- function(x, center = NA, scale = NA) {
@@ -42,6 +51,7 @@ wavsplit <-
   function(x,
            min_volume = 0,
            min_wave_size = x@samp.rate / 10) {
+    
     # assign every element in wave a group:
     #  when zero is encountered, move on to next group
     group_vector = vector("numeric", length(x@left))
@@ -71,17 +81,13 @@ wavsplit <-
   }
 
 # print values of wave as a C++ object definition
-as_cpp <- function(x,
+as_cpp <- function(wav,
                    label,
-                   reduction_factor = 1,
                    object_type = "byte",
                    max_int_size = 255) {
-  # down-sample wave by taking every k-th value
-  reduction_flag = 1:length(x) %% reduction_factor
-  include = which(reduction_flag == 0)
-  v = x@left[include]
   
   # convert wave values to range from -max_int_size to +max_int_size
+  v = wav@left
   values_to_write = round(v / max(abs(v)) * max_int_size)
   int_size = length(values_to_write)
   
