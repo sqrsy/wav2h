@@ -3,8 +3,8 @@ setwd("C:/Users/61436/Dropbox/Hobbies/Electronics/GitHub/wav2h")
 source("wav2h.R")
 
 MOVING_AVERAGE_WINDOW = 100
-SAVE_ONE_IN_EVERY = 20
-PROJECT_FOLDER = "household-percussion/"
+SAVE_ONE_IN_EVERY = 50
+PROJECT_FOLDER = "toy-animal-sounds/"
 WAV_FOLDER = "_wav out/"
 OUTPUT_DIR = "_h out/"
 OUTPUT_FILE = "sample_bank.h"
